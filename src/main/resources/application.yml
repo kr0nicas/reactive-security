@@ -1,0 +1,39 @@
+
+server:
+  port: 8081
+auth0:
+  audience: https://catalog-service-api/
+spring:
+  application:
+    name: catalog-config-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://itproject41.us.auth0.com/
+          jwk-set-uri: https://itproject41.us.auth0.com/.well-known/jwks.json
+  webflux:
+    base-path: /catalog-service
+  cloud:
+    gcp:
+      project-id: workflow-project-310806
+      #firestore:
+       # credentials:
+          #location: classpath:workflow-project-310806-d99cb406b13f.json #this file is added by environmen variable
+app:
+  api:
+    title: Catalog Configuration and Catalogs API
+    version: 1.0.0
+    description: Obtain the configuration properties for precalificate and catalogs
+    base-package: com.itproject.evolt
+    contact-name: apisupportgroup
+    contact-email: apisupportgroup@evolt.com
+    swagger:
+      enable: true
+
+logging:
+  level:
+    web: debug
+    org:
+      springframework:
+        security: DEBUG
