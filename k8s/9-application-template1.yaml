@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evolt-service-config-catalog-deployment
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evolt-service-config-catalog
+      version: v1
+      environment: development
+  template:
+    metadata:
+      labels:
+        app: evolt-service-config-catalog
+        version: v1
+        environment: development
+    spec:
+      volumes:
+      - name: google-cloud-key
+        secret:
+          secretName: firestore-service-account-key
+      containers:
+        - name: evolt-service-config-catalog
+          image: registry.gitlab.com/evolt-product/evolt-service-config-catalog:a4ad413138f51afa7115d5b33fc9995a40d86d6e
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 8081
+          volumeMounts:
+          - name: google-cloud-key
+            mountPath: /var/secrets/google
+          env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /var/secrets/google/key.json
+      imagePullSecrets:
+        - name: gitlab-pull-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: evolt-service-config-catalog-service
+  labels:
+    app: evolt-service-config-catalog
+    service: evolt-service-config-catalog-service
+spec:
+  ports:
+    - name: http-evolt-service-config-catalog-service
+      port: 8081
+      targetPort: 8081
+      protocol: TCP
+  selector:
+    app: evolt-service-config-catalog

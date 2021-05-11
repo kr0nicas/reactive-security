@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evolt-service-solicitud-deployment
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evolt-service-solicitud
+      version: v1
+      environment: development
+  template:
+    metadata:
+      labels:
+        app: evolt-service-solicitud
+        version: v1
+        environment: development
+    spec:
+      volumes:
+      - name: google-cloud-key
+        secret:
+          secretName: firestore-service-account-key
+      containers:
+        - name: evolt-service-solicitud
+          image: registry.gitlab.com/evolt-product/evolt-service-solicitud:2b923f022b80b13870a0db1af531cfa753788b37
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 8080
+          volumeMounts:
+          - name: google-cloud-key
+            mountPath: /var/secrets/google
+          env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /var/secrets/google/key.json
+          - name : CATALOG_SERVICE
+            value: http://evolt-service-config-catalog-service.default.svc.cluster.local:8081/catalog-service
+      imagePullSecrets:
+        - name: gitlab-pull-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: evolt-service-solicitud-service
+  labels:
+    app: evolt-service-solicitud
+    service: evolt-service-solicitud-service
+spec:
+  ports:
+    - name: http-evolt-service-solicitud-service
+      port: 8082
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: evolt-service-solicitud
